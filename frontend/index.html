@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Content Creator Hub</title>
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- VIDEO BACKGROUND (login only) -->
+<video autoplay muted loop playsinline id="bg-video">
+  <source src="bgrnd.mp4" type="video/mp4">
+</video>
+<div class="bg-overlay"></div>
+
+<!-- STARFIELD BACKGROUND (app, post-login) -->
+<canvas id="star-canvas"></canvas>
+<div class="space-gradient"></div>
+<div class="nebula-1"></div>
+<div class="nebula-2"></div>
+<div class="nebula-3"></div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<!-- ══════════════════════════════════
+     LOGIN PAGE
+══════════════════════════════════ -->
+<div class="page" id="login-page">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="brand-icon">✦</div>
+      <span class="brand-name">AI Content Creator Hub</span>
+    </div>
+    <h2>Welcome Back</h2>
+    <p class="login-sub">Sign in to your creator workspace</p>
+
+    <div class="field-wrap">
+      <label>Username</label>
+      <input type="text" id="login-username" placeholder="yourname" autocomplete="off">
+    </div>
+    <div class="field-wrap">
+      <label>Password</label>
+      <div class="pw-wrap">
+        <input type="password" id="login-password" placeholder="••••••••">
+        <button class="pw-toggle" onclick="togglePw()" type="button">👁</button>
+      </div>
+    </div>
+    <div id="login-error" class="login-error"></div>
+    <button class="btn-primary" onclick="doLogin()">Sign In →</button>
+    <p class="login-hint">Don't have an account? <span class="link" onclick="showRegister()">Register</span></p>
+  </div>
+
+  <!-- REGISTER CARD -->
+  <div class="login-card hidden" id="register-card">
+    <div class="login-brand">
+      <div class="brand-icon">✦</div>
+      <span class="brand-name">AI Content Creator Hub</span>
+    </div>
+    <h2>Create Account</h2>
+    <p class="login-sub">Join the creator workspace</p>
+
+    <div class="field-wrap">
+      <label>Username</label>
+      <input type="text" id="reg-username" placeholder="yourname" autocomplete="off">
+    </div>
+    <div class="field-wrap">
+      <label>Email</label>
+      <input type="email" id="reg-email" placeholder="you@email.com">
+    </div>
+    <div class="field-wrap">
+      <label>Password</label>
+      <div class="pw-wrap">
+        <input type="password" id="reg-password" placeholder="••••••••">
+        <button class="pw-toggle" onclick="togglePw('reg-password',this)" type="button">👁</button>
+      </div>
+    </div>
+    <div id="reg-error" class="login-error"></div>
+    <button class="btn-primary" onclick="doRegister()">Create Account →</button>
+    <p class="login-hint">Already have an account? <span class="link" onclick="showLogin()">Sign In</span></p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     MAIN APP
+══════════════════════════════════ -->
+<div class="page hidden" id="app-page">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon-sm">✦</span>
+      <span class="sidebar-title">AI Creator Hub</span>
+      <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item active" onclick="switchTab('generator',this)">
+        <span class="nav-icon">🎨</span><span>Generator</span>
+      </button>
+      <button class="nav-item" onclick="switchTab('favorites',this)">
+        <span class="nav-icon">❤️</span><span>Favorites</span>
+        <span class="badge" id="fav-badge">0</span>
+      </button>
+      <button class="nav-item" onclick="switchTab('history',this)">
+        <span class="nav-icon">🕓</span><span>History</span>
+        <span class="badge" id="hist-badge">0</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="usage-bar-wrap">
+        <div class="usage-label">
+          <span>Daily Usage</span>
+          <span id="usage-count">0 / 20</span>
+        </div>
+        <div class="usage-track"><div class="usage-fill" id="usage-fill"></div></div>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()">
+        <span id="theme-icon">🌙</span>
+        <span id="theme-label">Dark Mode</span>
+      </button>
+      <button class="btn-logout" onclick="doLogout()">⎋ Logout</button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-center">
+        <span class="topbar-title">AI Content Creator Hub</span>
+      </div>
+      <div class="topbar-user">
+        <span id="welcome-msg">👋 Hello!</span>
+        <div class="avatar" id="user-avatar">U</div>
+      </div>
+    </div>
+
+    <!-- ── GENERATOR TAB ── -->
+    <section class="tab-section active" id="tab-generator">
+      <div class="section-header">
+        <div>
+          <h2>Content Generator</h2>
+          <p>Create powerful content for any platform</p>
+        </div>
+      </div>
+
+      <div class="glass-card generator-card">
+
+        <!-- Platform -->
+        <div class="control-row">
+          <label class="ctrl-label">📱 Platform</label>
+          <div class="chip-group" id="platform-chips">
+            <button class="chip active" onclick="selectChip(this,'platform-chips')">YouTube</button>
+            <button class="chip" onclick="selectChip(this,'platform-chips')">Instagram</button>
+            <button class="chip" onclick="selectChip(this,'platform-chips')">Twitter / X</button>
+            <button class="chip" onclick="selectChip(this,'platform-chips')">LinkedIn</button>
+            <button class="chip" onclick="selectChip(this,'platform-chips')">TikTok</button>
+            <button class="chip" onclick="selectChip(this,'platform-chips')">Blog</button>
+          </div>
+        </div>
+
+        <!-- Tone -->
+        <div class="control-row">
+          <label class="ctrl-label">🎭 Tone</label>
+          <div class="chip-group" id="tone-chips">
+            <button class="chip active" onclick="selectChip(this,'tone-chips')">Professional</button>
+            <button class="chip" onclick="selectChip(this,'tone-chips')">Funny</button>
+            <button class="chip" onclick="selectChip(this,'tone-chips')">Casual</button>
+            <button class="chip" onclick="selectChip(this,'tone-chips')">Viral</button>
+            <button class="chip" onclick="selectChip(this,'tone-chips')">Inspirational</button>
+            <button class="chip" onclick="selectChip(this,'tone-chips')">Educational</button>
+          </div>
+        </div>
+
+        <!-- Language & Length -->
+        <div class="two-col">
+          <div class="control-row">
+            <label class="ctrl-label">🌐 Language</label>
+            <select id="lang-select" class="styled-select">
+              <option>English</option>
+              <option>Hindi</option>
+              <option>Kannada</option>
+              <option>Spanish</option>
+              <option>French</option>
+              <option>German</option>
+              <option>Arabic</option>
+              <option>Japanese</option>
+              <option>Portuguese</option>
+            </select>
+          </div>
+          <div class="control-row">
+            <label class="ctrl-label">📏 Length — <span id="len-label">Medium</span></label>
+            <input type="range" id="len-slider" min="1" max="3" value="2" class="slider" oninput="updateLenLabel(this.value)">
+          </div>
+        </div>
+
+        <!-- Topic -->
+        <div class="control-row">
+          <label class="ctrl-label">💡 Topic</label>
+          <div class="topic-wrap">
+            <input type="text" id="topic" placeholder="e.g. Morning workout routine, AI trends, Travel hacks…" onkeydown="if(event.key==='Enter') generate('title')">
+            <button class="mic-btn" id="mic-btn" onclick="toggleMic()" title="Voice Input">🎙</button>
+          </div>
+        </div>
+
+        <!-- Action Buttons — only 3 -->
+        <div class="action-grid">
+          <button onclick="generate('title')" class="action-btn">
+            <span class="action-icon">🎯</span>
+            <span>Generate Titles</span>
+          </button>
+          <button onclick="generate('script')" class="action-btn">
+            <span class="action-icon">📝</span>
+            <span>Write Script</span>
+          </button>
+          <button onclick="generate('hashtag')" class="action-btn">
+            <span class="action-icon">🏷</span>
+            <span>Get Hashtags</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- RESULT -->
+      <div class="glass-card result-container">
+        <div class="result-header">
+          <span id="result-title" class="result-title-text">Output</span>
+          <div class="result-actions">
+            <span class="word-count" id="word-count"></span>
+            <button class="icon-btn" onclick="favoriteResult()" id="fav-btn" title="Save to Favorites">♡</button>
+            <button class="icon-btn" onclick="copyResult()" id="copy-btn" title="Copy">📋</button>
+            <button class="icon-btn" onclick="shareResult()" title="Share Link">🔗</button>
+            <div class="dropdown-wrap">
+              <button class="icon-btn" onclick="toggleExportMenu()" title="Export">⬇️</button>
+              <div class="dropdown-menu hidden" id="export-menu">
+                <button onclick="exportAs('txt')">📄 Download TXT</button>
+                <button onclick="exportAs('md')">📝 Download Markdown</button>
+                <button onclick="exportAs('pdf')">🖨 Print / Save PDF</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="result-box" id="output">
+          <span class="placeholder-text">Your AI-generated content will appear here…<br><br>
+          <small>Tip: Press <kbd>Ctrl+Enter</kbd> to generate titles quickly</small></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── FAVORITES TAB ── -->
+    <section class="tab-section hidden" id="tab-favorites">
+      <div class="section-header">
+        <div>
+          <h2>❤️ Favorites</h2>
+          <p>Your saved content collection</p>
+        </div>
+      </div>
+      <div id="favorites-list" class="card-list"></div>
+    </section>
+
+    <!-- ── HISTORY TAB ── -->
+    <section class="tab-section hidden" id="tab-history">
+      <div class="section-header">
+        <div>
+          <h2>🕓 History</h2>
+          <p>All your past generations</p>
+        </div>
+        <div class="history-controls">
+          <input type="text" id="history-search" class="search-input" placeholder="🔍 Search…" oninput="renderHistory()">
+          <select id="history-filter" class="styled-select sm" onchange="renderHistory()">
+            <option value="">All Types</option>
+            <option value="title">Titles</option>
+            <option value="script">Script</option>
+            <option value="hashtag">Hashtags</option>
+          </select>
+          <button class="btn-danger" onclick="clearHistory()">🗑 Clear All</button>
+        </div>
+      </div>
+      <div id="history-list" class="card-list"></div>
+    </section>
+
+  </main>
+</div>
+
+<!-- SCHEDULE MODAL (kept for favorites scheduling) -->
+<div class="modal-overlay hidden" id="schedule-modal">
+  <div class="modal-card">
+    <h3>📅 Schedule Content</h3>
+    <p style="color:var(--text-muted);margin-bottom:16px">Pick a date to schedule this content</p>
+    <input type="date" id="schedule-date" class="styled-select" style="width:100%">
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn-primary" style="width:auto;padding:10px 20px" onclick="closeScheduleModal()">Done</button>
+      <button class="btn-logout" onclick="closeScheduleModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="shortcut-pill">⌨ Ctrl+Enter = Generate · Ctrl+K = Focus topic</div>
+
+<script src="script.js"></script>
+<script>
+// ── STARFIELD RENDERER ─────────────────────────
+(function() {
+  const canvas = document.getElementById('star-canvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H, stars = [], shootingStars = [];
+  const STAR_COUNT = 280;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function randBetween(a, b) { return a + Math.random() * (b - a); }
+
+  function initStars() {
+    stars = [];
+    for (let i = 0; i < STAR_COUNT; i++) {
+      const size = Math.random();
+      stars.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: size < 0.6 ? randBetween(0.3, 0.7)
+         : size < 0.9 ? randBetween(0.7, 1.2)
+         :               randBetween(1.2, 2.2),
+        alpha: randBetween(0.4, 1.0),
+        twinkleSpeed: randBetween(0.003, 0.012),
+        twinkleOffset: Math.random() * Math.PI * 2,
+        // colour: mostly white, occasional blue/gold tint
+        hue: Math.random() < 0.15 ? randBetween(200, 240)
+           : Math.random() < 0.08 ? randBetween(40, 55)
+           : null
+      });
+    }
+  }
+
+  function spawnShootingStar() {
+    const startX = randBetween(W * 0.1, W * 0.9);
+    const startY = randBetween(H * 0.0, H * 0.3);
+    shootingStars.push({
+      x: startX, y: startY,
+      vx: randBetween(4, 9),
+      vy: randBetween(2, 5),
+      len: randBetween(80, 200),
+      alpha: 1,
+      life: 0,
+      maxLife: randBetween(40, 70)
+    });
+  }
+
+  let frame = 0;
+  function draw() {
+    frame++;
+    const isDark = !document.documentElement.getAttribute('data-theme') || document.documentElement.getAttribute('data-theme') === 'dark';
+    ctx.clearRect(0, 0, W, H);
+
+    // Draw stars
+    for (const s of stars) {
+      const twinkle = 0.5 + 0.5 * Math.sin(frame * s.twinkleSpeed + s.twinkleOffset);
+      const a = s.alpha * (0.6 + 0.4 * twinkle);
+      const col = s.hue !== null
+        ? `hsla(${s.hue},70%,${isDark?'90%':'60%'},${a})`
+        : isDark ? `rgba(220,235,255,${a})` : `rgba(60,80,180,${a * 0.6})`;
+
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = col;
+      ctx.fill();
+
+      // Glow for bigger stars
+      if (s.r > 1.4) {
+        const grd = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 4);
+        grd.addColorStop(0, isDark ? `rgba(180,210,255,${a * 0.4})` : `rgba(80,100,200,${a * 0.2})`);
+        grd.addColorStop(1, 'transparent');
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r * 4, 0, Math.PI * 2);
+        ctx.fillStyle = grd;
+        ctx.fill();
+      }
+    }
+
+    // Shooting stars
+    if (frame % 220 === 0 && Math.random() < 0.7) spawnShootingStar();
+    for (let i = shootingStars.length - 1; i >= 0; i--) {
+      const ss = shootingStars[i];
+      ss.x += ss.vx; ss.y += ss.vy; ss.life++;
+      const prog = ss.life / ss.maxLife;
+      ss.alpha = prog < 0.2 ? prog / 0.2 : 1 - (prog - 0.2) / 0.8;
+      if (ss.alpha <= 0 || ss.life >= ss.maxLife) { shootingStars.splice(i, 1); continue; }
+
+      const tailX = ss.x - ss.vx / Math.hypot(ss.vx, ss.vy) * ss.len;
+      const tailY = ss.y - ss.vy / Math.hypot(ss.vx, ss.vy) * ss.len;
+      const grad  = ctx.createLinearGradient(tailX, tailY, ss.x, ss.y);
+      grad.addColorStop(0, 'transparent');
+      grad.addColorStop(1, `rgba(200,230,255,${ss.alpha * 0.9})`);
+      ctx.beginPath();
+      ctx.moveTo(tailX, tailY);
+      ctx.lineTo(ss.x, ss.y);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth   = 1.5;
+      ctx.stroke();
+
+      // Head dot
+      ctx.beginPath();
+      ctx.arc(ss.x, ss.y, 1.5, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${ss.alpha})`;
+      ctx.fill();
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', () => { resize(); initStars(); });
+  resize();
+  initStars();
+  draw();
+})();
+</script>
+</body>
+</html>
