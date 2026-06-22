@@ -1,5 +1,5 @@
 
-const API_BASE = "http://127.0.0.1:8000"; 
+const API_BASE = "https://ai-content-creator-hub-production.up.railway.app";
 const DAILY_LIMIT = 20;
 
 let currentResult  = "";
