@@ -2,6 +2,9 @@
 
 AI Content Creator Hub is a web-based platform that helps users generate content using AI.
 
+## Live Demo
+# https://ai-content-creator-hub.netlify.app/
+
 ## Features
 
 * User Registration & Login
@@ -50,6 +53,6 @@ pip install -r backend/requirements.txt
 uvicorn backend.main:app --reload
 ```
 
-## Author
+## Developer
 
 Akash Salian
