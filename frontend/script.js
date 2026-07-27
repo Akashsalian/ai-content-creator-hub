@@ -1,5 +1,5 @@
 
-const API_BASE = "http://13.203.208.192:8000";
+const API_BASE = "https://13-203-208-192.nip.io";
 const DAILY_LIMIT = 20;
 
 let currentResult  = "";
